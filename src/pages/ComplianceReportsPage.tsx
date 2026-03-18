@@ -14,7 +14,8 @@ import {
   SectionHeader,
   useAIChatContext,
 } from '@diligentcorp/atlas-react-bundle';
-import { Box, Container, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
+import { Box, Container, List, ListItem, ListItemText, Stack, Typography, useTheme } from '@mui/material';
+import ReactECharts from 'echarts-for-react';
 import { NavLink } from 'react-router';
 
 interface Message {
@@ -98,7 +99,9 @@ function ReportContent() {
           <Box
             sx={({ palette }) => ({
               flex: 2,
+              minWidth: 0,
               overflowY: 'auto',
+              overflowX: 'hidden',
               border: '1px solid',
               borderColor: palette.divider,
               borderRadius: 2,
@@ -121,7 +124,7 @@ function ReportContent() {
               minWidth: 0,
             })}
           >
-            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', px: 2, pt: 2, pb: 1 }}>
+            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', px: 2, pt: 2, pb: 4 }}>
               <AIChatContent>
                 {messages.map((msg) =>
                   msg.role === 'user' ? (
@@ -152,7 +155,7 @@ function ReportContent() {
               </AIChatContent>
             </Box>
 
-            <Box sx={{ flexShrink: 0, px: 2 }}>
+            <Box sx={{ flexShrink: 0, px: 2, pb: 2 }}>
               <AIChatBox onSubmit={handleSubmit} onStop={() => setIsGenerating(false)} isUploadAvailable={false} />
             </Box>
           </Box>
@@ -160,6 +163,254 @@ function ReportContent() {
       </Stack>
     </Container>
   );
+}
+
+function useChartPalette() {
+  const theme = useTheme();
+  return [
+    theme.palette.primary.main,
+    theme.palette.secondary.main,
+    theme.palette.success.main,
+    theme.palette.warning.main,
+    theme.palette.error.main,
+    theme.palette.info.main,
+  ];
+}
+
+function CaseVolumeTrendChart() {
+  const theme = useTheme();
+  const color = theme.palette.primary.main;
+  const option = {
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'category',
+      data: ['2022', '2023', '2024', '2025', '2026 (Q1)'],
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Cases',
+      nameTextStyle: { color: theme.palette.text.secondary },
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    series: [
+      {
+        name: 'Cases submitted',
+        type: 'bar',
+        data: [5, 6, 7, 8, 4],
+        itemStyle: { color, borderRadius: [4, 4, 0, 0] },
+        label: { show: true, position: 'top', color: theme.palette.text.primary },
+      },
+    ],
+    grid: { left: 40, right: 20, top: 30, bottom: 30 },
+  };
+  return <ReactECharts option={option} style={{ height: 240, width: '100%' }} />;
+}
+
+function CaseCategoriesChart() {
+  const palette = useChartPalette();
+  const theme = useTheme();
+  const categories = ['Data Privacy', 'Bribery', 'Health & Safety', 'Discrimination', 'Fraud', 'Harassment'];
+  const values = [1, 1, 2, 6, 9, 11];
+  const option = {
+    tooltip: { trigger: 'axis', formatter: '{b}: {c} cases' },
+    xAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    yAxis: {
+      type: 'category',
+      data: categories,
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    series: [
+      {
+        name: 'Cases',
+        type: 'bar',
+        data: values.map((v, i) => ({ value: v, itemStyle: { color: palette[i % palette.length], borderRadius: [0, 4, 4, 0] } })),
+        label: { show: true, position: 'right', color: theme.palette.text.primary },
+      },
+    ],
+    grid: { left: 100, right: 50, top: 10, bottom: 30 },
+  };
+  return <ReactECharts option={option} style={{ height: 240, width: '100%' }} />;
+}
+
+function IntakeChannelsChart() {
+  const theme = useTheme();
+  const color = theme.palette.secondary.main;
+  const option = {
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    yAxis: {
+      type: 'category',
+      data: ['Vault Talk', 'Manual intake', 'Open Reporting', 'App'],
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    series: [
+      {
+        name: 'Submissions',
+        type: 'bar',
+        data: [3, 6, 7, 14],
+        itemStyle: { color, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'right', color: theme.palette.text.primary },
+      },
+    ],
+    grid: { left: 100, right: 40, top: 10, bottom: 30 },
+  };
+  return <ReactECharts option={option} style={{ height: 200, width: '100%' }} />;
+}
+
+function RegionalDistributionChart() {
+  const theme = useTheme();
+  const palette = useChartPalette();
+  const option = {
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    yAxis: {
+      type: 'category',
+      data: ['Unknown', 'Singapore', 'Germany', 'United States', 'United Kingdom'],
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    series: [
+      {
+        name: 'Cases',
+        type: 'bar',
+        data: [
+          { value: 4, itemStyle: { color: theme.palette.text.disabled, borderRadius: [0, 4, 4, 0] } },
+          { value: 4, itemStyle: { color: palette[3], borderRadius: [0, 4, 4, 0] } },
+          { value: 5, itemStyle: { color: palette[2], borderRadius: [0, 4, 4, 0] } },
+          { value: 7, itemStyle: { color: palette[1], borderRadius: [0, 4, 4, 0] } },
+          { value: 11, itemStyle: { color: palette[0], borderRadius: [0, 4, 4, 0] } },
+        ],
+        label: { show: true, position: 'right', color: theme.palette.text.primary },
+      },
+    ],
+    grid: { left: 120, right: 40, top: 10, bottom: 30 },
+  };
+  return <ReactECharts option={option} style={{ height: 220, width: '100%' }} />;
+}
+
+function CaseStatusChart() {
+  const palette = useChartPalette();
+  const theme = useTheme();
+  const statusColors = [palette[4], palette[3], palette[0], palette[2]];
+  const option = {
+    tooltip: { trigger: 'axis', formatter: '{b}: {c} cases' },
+    xAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    yAxis: {
+      type: 'category',
+      data: ['New / unactioned', 'Read', 'Under investigation', 'Closed'],
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    series: [
+      {
+        name: 'Cases',
+        type: 'bar',
+        data: [3, 4, 11, 12].map((v, i) => ({ value: v, itemStyle: { color: statusColors[i], borderRadius: [0, 4, 4, 0] } })),
+        label: { show: true, position: 'right', color: theme.palette.text.primary },
+      },
+    ],
+    grid: { left: 130, right: 50, top: 10, bottom: 30 },
+  };
+  return <ReactECharts option={option} style={{ height: 180, width: '100%' }} />;
+}
+
+function ResolutionTimelineChart() {
+  const theme = useTheme();
+  const option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { bottom: 0, textStyle: { color: theme.palette.text.secondary } },
+    xAxis: {
+      type: 'value',
+      max: 15,
+      axisLabel: { color: theme.palette.text.secondary },
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+    },
+    yAxis: {
+      type: 'category',
+      data: ['Open cases'],
+      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+    },
+    series: [
+      {
+        name: '< 90 days',
+        type: 'bar',
+        stack: 'age',
+        data: [0],
+        itemStyle: { color: theme.palette.success.main },
+        label: { show: false },
+      },
+      {
+        name: '90–180 days',
+        type: 'bar',
+        stack: 'age',
+        data: [5],
+        itemStyle: { color: theme.palette.warning.main },
+        label: { show: true, position: 'inside', formatter: '{c}' },
+      },
+      {
+        name: '180+ days',
+        type: 'bar',
+        stack: 'age',
+        data: [10],
+        itemStyle: { color: theme.palette.error.main, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'inside', formatter: '{c}' },
+      },
+    ],
+    grid: { left: 80, right: 40, top: 10, bottom: 50 },
+  };
+  return <ReactECharts option={option} style={{ height: 130, width: '100%' }} />;
+}
+
+function DepartmentalPatternsChart() {
+  const theme = useTheme();
+  const color = theme.palette.info.main;
+  const option = {
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    yAxis: {
+      type: 'category',
+      data: ['HR', 'Unknown', 'Engineering', 'Sales', 'Finance', 'Operations', 'Legal & Compliance'],
+      axisLine: { lineStyle: { color: theme.palette.divider } },
+      axisLabel: { color: theme.palette.text.secondary },
+    },
+    series: [
+      {
+        name: 'Cases',
+        type: 'bar',
+        data: [3, 4, 4, 4, 4, 5, 6],
+        itemStyle: { color, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'right', color: theme.palette.text.primary },
+      },
+    ],
+    grid: { left: 140, right: 40, top: 10, bottom: 30 },
+  };
+  return <ReactECharts option={option} style={{ height: 260, width: '100%' }} />;
 }
 
 function ReportBody() {
@@ -190,6 +441,7 @@ function ReportBody() {
           <Typography variant="body1">
             Since the programme's launch in January 2022, Acme Global Ltd has received 30 cases in total. Annual volumes have increased progressively:
           </Typography>
+          <CaseVolumeTrendChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {[
               '5 cases recorded in 2022',
@@ -212,6 +464,7 @@ function ReportBody() {
         <Stack gap={1}>
           <Typography variant="h2">Case categories and intake channels</Typography>
           <Typography variant="body1">Cases by category:</Typography>
+          <CaseCategoriesChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {[
               'Harassment — 11 cases (most frequent)',
@@ -227,6 +480,7 @@ function ReportBody() {
             ))}
           </List>
           <Typography variant="body1">Cases by intake channel:</Typography>
+          <IntakeChannelsChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {['App — 14 submissions (dominant channel)', 'Open Reporting — 7 submissions', 'Manual intake — 6 submissions', 'Vault Talk — 3 submissions'].map(
               (item) => (
@@ -244,6 +498,7 @@ function ReportBody() {
 
         <Stack gap={1}>
           <Typography variant="h2">Regional distribution</Typography>
+          <RegionalDistributionChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {[
               'United Kingdom — 11 cases',
@@ -266,6 +521,20 @@ function ReportBody() {
 
         <Stack gap={1}>
           <Typography variant="h2">Case status and resolution timelines</Typography>
+          <Stack direction="row" gap={2}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                Status breakdown
+              </Typography>
+              <CaseStatusChart />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                Open cases by age
+              </Typography>
+              <ResolutionTimelineChart />
+            </Box>
+          </Stack>
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {['Closed — 12 cases (40%)', 'Under investigation — 11 cases (36.7%)', 'Read — 4 cases (13.3%)', 'New, unactioned — 3 cases (10%)'].map((item) => (
               <ListItem key={item} divider={false} sx={{ display: 'list-item', listStyleType: 'disc', py: 0.25 }}>
@@ -282,6 +551,7 @@ function ReportBody() {
 
         <Stack gap={1}>
           <Typography variant="h2">Departmental patterns</Typography>
+          <DepartmentalPatternsChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {[
               'Legal & Compliance — 6 cases (highest)',

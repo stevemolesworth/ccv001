@@ -25,6 +25,8 @@
     "@mui/x-date-pickers-pro": "^8",
     "@mui/x-license": "^8",
     "@mui/x-tree-view": "^8",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
     "lit": "^3",
     "react": "^19",
     "react-dom": "^19",
