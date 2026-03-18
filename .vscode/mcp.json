@@ -6,6 +6,12 @@
         "x-atlas-environment": "prototype",
         "Authorization": "Bearer atlas_sk_eacde250f99b24659931bd8155dd083fb7839add2c0729d860068aa4ae9e52d2"
       }
+    },
+    "vibesharing": {
+      "url": "https://vibesharing.app/api/mcp",
+      "headers": {
+        "Authorization": "vs_4140965878655ae31f8eed2320f81354f6939df6cd83681d"
+      }
     }
   }
 }
