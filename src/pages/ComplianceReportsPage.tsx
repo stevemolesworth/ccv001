@@ -520,6 +520,7 @@ function ReportBody() {
         <Stack gap={1}>
           <Typography variant="h2">Case status and resolution timelines</Typography>
           <CaseStatusChart />
+          <ResolutionTimelineChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {['Closed — 12 cases (40%)', 'Under investigation — 11 cases (36.7%)', 'Read — 4 cases (13.3%)', 'New, unactioned — 3 cases (10%)'].map((item) => (
               <ListItem key={item} divider={false} sx={{ display: 'list-item', listStyleType: 'disc', py: 0.25 }}>
