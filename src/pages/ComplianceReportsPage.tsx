@@ -229,7 +229,6 @@ function CaseCategoriesChart() {
     },
     series: [
       {
-        name: 'Cases',
         type: 'bar',
         data: values.map((v, i) => ({ value: v, itemStyle: { color: palette[i % palette.length], borderRadius: [0, 4, 4, 0] } })),
         label: { show: true, position: 'right', color: theme.palette.text.primary },
@@ -258,7 +257,6 @@ function IntakeChannelsChart() {
     },
     series: [
       {
-        name: 'Submissions',
         type: 'bar',
         data: [3, 6, 7, 14],
         itemStyle: { color, borderRadius: [0, 4, 4, 0] },
@@ -521,20 +519,7 @@ function ReportBody() {
 
         <Stack gap={1}>
           <Typography variant="h2">Case status and resolution timelines</Typography>
-          <Stack direction="row" gap={2}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                Status breakdown
-              </Typography>
-              <CaseStatusChart />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                Open cases by age
-              </Typography>
-              <ResolutionTimelineChart />
-            </Box>
-          </Stack>
+          <CaseStatusChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {['Closed — 12 cases (40%)', 'Under investigation — 11 cases (36.7%)', 'Read — 4 cases (13.3%)', 'New, unactioned — 3 cases (10%)'].map((item) => (
               <ListItem key={item} divider={false} sx={{ display: 'list-item', listStyleType: 'disc', py: 0.25 }}>
