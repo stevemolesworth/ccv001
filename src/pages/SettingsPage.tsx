@@ -1,7 +1,7 @@
-import { PageHeader, OverflowBreadcrumbs } from "@diligentcorp/atlas-react-bundle";
-import { NavLink } from "react-router";
+import { PageHeader, OverflowBreadcrumbs } from '@diligentcorp/atlas-react-bundle';
+import { NavLink } from 'react-router';
 
-import PageLayout from "../components/PageLayout.js";
+import PageLayout from '../components/PageLayout.js';
 
 export default function SettingsPage() {
   return (
@@ -11,12 +11,12 @@ export default function SettingsPage() {
         pageSubtitle="This is the app's settings"
         breadcrumbs={
           <OverflowBreadcrumbs
-            leadingElement={<span>My App</span>}
+            leadingElement={<span>Connected Compliance</span>}
             items={[
               {
-                id: "settings",
-                label: "Settings",
-                url: "/",
+                id: 'settings',
+                label: 'Settings',
+                url: '/',
               },
             ]}
             hideLastItem={true}
