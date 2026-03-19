@@ -14,7 +14,7 @@ export default function App() {
       <Route
         path="/"
         element={
-          <AppLayout navigation={<Navigation />}>
+          <AppLayout navigation={<Navigation />} orgName="Connected Compliance">
             <Outlet />
           </AppLayout>
         }

@@ -218,6 +218,7 @@ function CaseCategoriesChart() {
     tooltip: { trigger: 'axis', formatter: '{b}: {c} cases' },
     xAxis: {
       type: 'value',
+      max: 15,
       splitLine: { lineStyle: { color: theme.palette.divider } },
       axisLabel: { color: theme.palette.text.secondary },
     },
@@ -234,7 +235,7 @@ function CaseCategoriesChart() {
         label: { show: true, position: 'right', color: theme.palette.text.primary },
       },
     ],
-    grid: { left: 100, right: 50, top: 10, bottom: 30 },
+    grid: { left: 20, right: 50, top: 10, bottom: 30, containLabel: true },
   };
   return <ReactECharts option={option} style={{ height: 240, width: '100%' }} />;
 }
@@ -246,6 +247,7 @@ function IntakeChannelsChart() {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'value',
+      max: 18,
       splitLine: { lineStyle: { color: theme.palette.divider } },
       axisLabel: { color: theme.palette.text.secondary },
     },
@@ -263,7 +265,7 @@ function IntakeChannelsChart() {
         label: { show: true, position: 'right', color: theme.palette.text.primary },
       },
     ],
-    grid: { left: 100, right: 40, top: 10, bottom: 30 },
+    grid: { left: 20, right: 40, top: 10, bottom: 30, containLabel: true },
   };
   return <ReactECharts option={option} style={{ height: 200, width: '100%' }} />;
 }
@@ -275,6 +277,7 @@ function RegionalDistributionChart() {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'value',
+      max: 15,
       splitLine: { lineStyle: { color: theme.palette.divider } },
       axisLabel: { color: theme.palette.text.secondary },
     },
@@ -298,7 +301,7 @@ function RegionalDistributionChart() {
         label: { show: true, position: 'right', color: theme.palette.text.primary },
       },
     ],
-    grid: { left: 120, right: 40, top: 10, bottom: 30 },
+    grid: { left: 20, right: 40, top: 10, bottom: 30, containLabel: true },
   };
   return <ReactECharts option={option} style={{ height: 220, width: '100%' }} />;
 }
@@ -311,6 +314,7 @@ function CaseStatusChart() {
     tooltip: { trigger: 'axis', formatter: '{b}: {c} cases' },
     xAxis: {
       type: 'value',
+      max: 16,
       splitLine: { lineStyle: { color: theme.palette.divider } },
       axisLabel: { color: theme.palette.text.secondary },
     },
@@ -328,57 +332,9 @@ function CaseStatusChart() {
         label: { show: true, position: 'right', color: theme.palette.text.primary },
       },
     ],
-    grid: { left: 130, right: 50, top: 10, bottom: 30 },
+    grid: { left: 20, right: 50, top: 10, bottom: 30, containLabel: true },
   };
   return <ReactECharts option={option} style={{ height: 180, width: '100%' }} />;
-}
-
-function ResolutionTimelineChart() {
-  const theme = useTheme();
-  const option = {
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { bottom: 0, textStyle: { color: theme.palette.text.secondary } },
-    xAxis: {
-      type: 'value',
-      max: 15,
-      axisLabel: { color: theme.palette.text.secondary },
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-    },
-    yAxis: {
-      type: 'category',
-      data: ['Open cases'],
-      axisLabel: { color: theme.palette.text.secondary },
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-    },
-    series: [
-      {
-        name: '< 90 days',
-        type: 'bar',
-        stack: 'age',
-        data: [0],
-        itemStyle: { color: theme.palette.success.main },
-        label: { show: false },
-      },
-      {
-        name: '90–180 days',
-        type: 'bar',
-        stack: 'age',
-        data: [5],
-        itemStyle: { color: theme.palette.warning.main },
-        label: { show: true, position: 'inside', formatter: '{c}' },
-      },
-      {
-        name: '180+ days',
-        type: 'bar',
-        stack: 'age',
-        data: [10],
-        itemStyle: { color: theme.palette.error.main, borderRadius: [0, 4, 4, 0] },
-        label: { show: true, position: 'inside', formatter: '{c}' },
-      },
-    ],
-    grid: { left: 80, right: 40, top: 10, bottom: 50 },
-  };
-  return <ReactECharts option={option} style={{ height: 130, width: '100%' }} />;
 }
 
 function DepartmentalPatternsChart() {
@@ -388,6 +344,7 @@ function DepartmentalPatternsChart() {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'value',
+      max: 8,
       splitLine: { lineStyle: { color: theme.palette.divider } },
       axisLabel: { color: theme.palette.text.secondary },
     },
@@ -406,7 +363,7 @@ function DepartmentalPatternsChart() {
         label: { show: true, position: 'right', color: theme.palette.text.primary },
       },
     ],
-    grid: { left: 140, right: 40, top: 10, bottom: 30 },
+    grid: { left: 20, right: 40, top: 10, bottom: 30, containLabel: true },
   };
   return <ReactECharts option={option} style={{ height: 260, width: '100%' }} />;
 }
@@ -520,7 +477,6 @@ function ReportBody() {
         <Stack gap={1}>
           <Typography variant="h2">Case status and resolution timelines</Typography>
           <CaseStatusChart />
-          <ResolutionTimelineChart />
           <List dense disablePadding sx={{ pl: 2, '& .MuiListItem-root': { borderBottom: 'none', borderBlockEnd: 'none', borderBottomWidth: 0 } }}>
             {['Closed — 12 cases (40%)', 'Under investigation — 11 cases (36.7%)', 'Read — 4 cases (13.3%)', 'New, unactioned — 3 cases (10%)'].map((item) => (
               <ListItem key={item} divider={false} sx={{ display: 'list-item', listStyleType: 'disc', py: 0.25 }}>
