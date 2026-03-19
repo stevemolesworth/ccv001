@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AIChatAIMessage,
   AIChatBox,
@@ -14,9 +14,123 @@ import {
   SectionHeader,
   useAIChatContext,
 } from '@diligentcorp/atlas-react-bundle';
-import { Box, Container, List, ListItem, ListItemText, Stack, Typography, useTheme } from '@mui/material';
+import { Box, Button, Card, CardContent, Container, LinearProgress, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import ReactECharts from 'echarts-for-react';
 import { NavLink } from 'react-router';
+
+const GENERATION_STEPS = [
+  { progress: 0,   text: 'Reading data from Policy Manager' },
+  { progress: 20,  text: 'Reading data from Vault' },
+  { progress: 42,  text: 'Reading data from Training' },
+  { progress: 60,  text: 'Analysing patterns and trends' },
+  { progress: 78,  text: 'Generating recommendations' },
+  { progress: 92,  text: 'Finalising report' },
+  { progress: 100, text: 'Report generated' },
+];
+
+const SOURCE_TILES = [
+  { label: 'Policy Manager', records: 847,  lastUpdated: '18 Mar 2026' },
+  { label: 'Vault',          records: 30,   lastUpdated: '13 Mar 2026' },
+  { label: 'Training',       records: 1204, lastUpdated: '15 Mar 2026' },
+];
+
+function GeneratingScreen({ onComplete }: { onComplete: () => void }) {
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    if (stepIndex < GENERATION_STEPS.length - 1) {
+      const t = setTimeout(() => setStepIndex((i) => i + 1), 417);
+      return () => clearTimeout(t);
+    }
+  }, [stepIndex]);
+
+  const { progress, text } = GENERATION_STEPS[stepIndex];
+  const isDone = progress === 100;
+
+  return (
+    <Box
+      sx={{
+        height: 'calc(100dvh - 64px)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 5,
+        px: 4,
+      }}
+    >
+      <Typography variant="h1" textAlign="center">
+        Connected Compliance
+      </Typography>
+
+      <Stack direction="row" gap={3} sx={{ width: '100%', maxWidth: 800 }}>
+        {SOURCE_TILES.map((tile) => (
+          <Card key={tile.label} sx={{ flex: 1 }}>
+            <CardContent>
+              <Typography variant="h3" component="h2" fontWeight={600} gutterBottom>
+                {tile.label}
+              </Typography>
+              <Typography variant="h2" component="p">
+                {tile.records.toLocaleString()}
+              </Typography>
+              <Typography variant="textSm" color="text.secondary">
+                records
+              </Typography>
+              <Typography variant="textSm" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                Last updated {tile.lastUpdated}
+              </Typography>
+            </CardContent>
+          </Card>
+        ))}
+      </Stack>
+
+      <Box sx={{ width: '100%', maxWidth: 800 }}>
+        <LinearProgress
+          variant="determinate"
+          value={progress}
+          sx={{ height: 6, borderRadius: 3, mb: 2 }}
+        />
+        <Box
+          key={stepIndex}
+          sx={{
+            '@keyframes fadeInUp': {
+              from: { opacity: 0, transform: 'translateY(6px)' },
+              to:   { opacity: 1, transform: 'translateY(0)' },
+            },
+            animation: 'fadeInUp 0.25s ease',
+            textAlign: 'center',
+          }}
+        >
+          <Typography
+            variant="textMd"
+            color={isDone ? 'success.main' : 'text.secondary'}
+            sx={{ fontWeight: isDone ? 600 : 400 }}
+          >
+            {text}
+          </Typography>
+        </Box>
+        {isDone && (
+          <Box
+            sx={{
+              '@keyframes fadeInUp': {
+                from: { opacity: 0, transform: 'translateY(6px)' },
+                to:   { opacity: 1, transform: 'translateY(0)' },
+              },
+              animation: 'fadeInUp 0.3s ease 0.15s both',
+              display: 'flex',
+              justifyContent: 'center',
+              mt: 3,
+            }}
+          >
+            <Button variant="contained" size="large" onClick={onComplete}>
+              View Report
+            </Button>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+}
 
 interface Message {
   id: string;
@@ -25,12 +139,12 @@ interface Message {
   time: string;
 }
 
-const EDIT_RESPONSES = [
-  "I've updated the section as requested. The changes are reflected in the report on the left.",
-  "Done! I've applied those edits. Let me know if you'd like to refine further.",
-  "Got it — I've made the changes you described. Feel free to ask for more adjustments.",
-  'The report has been updated. Would you like me to make any other changes?',
-  "I've revised that section. Review the changes on the left and let me know what you think.",
+const DISCUSSION_RESPONSES = [
+  "Great question. Based on the data in this report, harassment and fraud together account for 7 of the 10 most aged open cases — that's a significant concentration worth discussing.",
+  'Looking at the regional breakdown, the UK leads with 11 cases compared to just 4 from Singapore. There are a few possible explanations worth exploring — would you like to dig into that?',
+  'The Q1 2026 figure of 4 submissions is the highest single-quarter total on record. That trend line is worth unpacking in more detail.',
+  'Legal & Compliance having the highest departmental case count is notable given its governance remit. The report flags this as an area needing specific management attention.',
+  'The App channel now accounts for nearly half of all submissions. That shift away from manual intake and Vault Talk is a meaningful signal about reporter preference.',
 ];
 
 function nowTime() {
@@ -41,12 +155,18 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: '0',
     role: 'assistant',
-    content: "Hi! I can help you edit this report. Describe the changes you'd like to make and I'll apply them.",
+    content: 'This report contains 5 recommended actions. Would you like to discuss any of them?',
     time: nowTime(),
   },
 ];
 
 export default function ComplianceReportsPage() {
+  const [phase, setPhase] = useState<'generating' | 'report'>('generating');
+
+  if (phase === 'generating') {
+    return <GeneratingScreen onComplete={() => setPhase('report')} />;
+  }
+
   return (
     <AIChatContextProvider initialHasStartedChat>
       <ReportContent />
@@ -62,7 +182,7 @@ function ReportContent() {
     setMessages((prev) => [...prev, { id: Date.now().toString(), role: 'user', content: prompt, time: nowTime() }]);
     const delay = 900 + Math.random() * 1100;
     setTimeout(() => {
-      const response = EDIT_RESPONSES[Math.floor(Math.random() * EDIT_RESPONSES.length)];
+      const response = DISCUSSION_RESPONSES[Math.floor(Math.random() * DISCUSSION_RESPONSES.length)];
       setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: response, time: nowTime() }]);
       setIsGenerating(false);
     }, delay);
@@ -156,7 +276,12 @@ function ReportContent() {
             </Box>
 
             <Box sx={{ flexShrink: 0, px: 2, pb: 2 }}>
-              <AIChatBox onSubmit={handleSubmit} onStop={() => setIsGenerating(false)} isUploadAvailable={false} />
+              <AIChatBox
+                onSubmit={handleSubmit}
+                onStop={() => setIsGenerating(false)}
+                isUploadAvailable={false}
+                slotProps={{ textField: { placeholder: 'What would you like to explore?' } }}
+              />
             </Box>
           </Box>
         </Stack>
@@ -165,43 +290,50 @@ function ReportContent() {
   );
 }
 
-function useChartPalette() {
-  const theme = useTheme();
-  return [
-    theme.palette.primary.main,
-    theme.palette.secondary.main,
-    theme.palette.success.main,
-    theme.palette.warning.main,
-    theme.palette.error.main,
-    theme.palette.info.main,
-  ];
-}
+// Style guide color constants — do not use raw values outside this block
+const VIZ = {
+  categorical: ['#4BC8C8', '#E8674A', '#F5A623', '#5B9BD5', '#A8B400', '#8B6DB0', '#E07DA0', '#5BAD6F'],
+  gradient:    ['#4BC8C8', '#5BAD6F', '#A8B400', '#F5A623', '#E8674A'],
+  teal:        '#4BC8C8',
+  softBlue:    '#5B9BD5',
+  alert:       '#E8674A',
+  success:     '#5BAD6F',
+  amber:       '#F5A623',
+  neutral:     '#9CA3AF',
+  gridline:    '#E0E0E0',
+  axisLabel:   '#6B7280',
+  dataLabel:   '#1A1A2E',
+} as const;
+
+const AXIS_DEFAULTS = {
+  axisLine:  { lineStyle: { color: VIZ.gridline } },
+  axisLabel: { color: VIZ.axisLabel },
+  splitLine: { lineStyle: { color: VIZ.gridline } },
+};
 
 function CaseVolumeTrendChart() {
-  const theme = useTheme();
-  const color = theme.palette.primary.main;
   const option = {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'category',
       data: ['2022', '2023', '2024', '2025', '2026 (Q1)'],
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: AXIS_DEFAULTS.axisLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     yAxis: {
       type: 'value',
       name: 'Cases',
-      nameTextStyle: { color: theme.palette.text.secondary },
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      nameTextStyle: { color: VIZ.axisLabel },
+      splitLine: AXIS_DEFAULTS.splitLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     series: [
       {
         name: 'Cases submitted',
         type: 'bar',
         data: [5, 6, 7, 8, 4],
-        itemStyle: { color, borderRadius: [4, 4, 0, 0] },
-        label: { show: true, position: 'top', color: theme.palette.text.primary },
+        itemStyle: { color: VIZ.teal, borderRadius: [4, 4, 0, 0] },
+        label: { show: true, position: 'top', color: VIZ.dataLabel },
       },
     ],
     grid: { left: 40, right: 20, top: 30, bottom: 30 },
@@ -210,8 +342,6 @@ function CaseVolumeTrendChart() {
 }
 
 function CaseCategoriesChart() {
-  const palette = useChartPalette();
-  const theme = useTheme();
   const categories = ['Data Privacy', 'Bribery', 'Health & Safety', 'Discrimination', 'Fraud', 'Harassment'];
   const values = [1, 1, 2, 6, 9, 11];
   const option = {
@@ -219,20 +349,23 @@ function CaseCategoriesChart() {
     xAxis: {
       type: 'value',
       max: 15,
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      splitLine: AXIS_DEFAULTS.splitLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     yAxis: {
       type: 'category',
       data: categories,
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: AXIS_DEFAULTS.axisLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     series: [
       {
         type: 'bar',
-        data: values.map((v, i) => ({ value: v, itemStyle: { color: palette[i % palette.length], borderRadius: [0, 4, 4, 0] } })),
-        label: { show: true, position: 'right', color: theme.palette.text.primary },
+        data: values.map((v, i) => ({
+          value: v,
+          itemStyle: { color: VIZ.categorical[i % VIZ.categorical.length], borderRadius: [0, 4, 4, 0] },
+        })),
+        label: { show: true, position: 'right', color: VIZ.dataLabel },
       },
     ],
     grid: { left: 20, right: 50, top: 10, bottom: 30, containLabel: true },
@@ -241,28 +374,26 @@ function CaseCategoriesChart() {
 }
 
 function IntakeChannelsChart() {
-  const theme = useTheme();
-  const color = theme.palette.secondary.main;
   const option = {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'value',
       max: 18,
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      splitLine: AXIS_DEFAULTS.splitLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     yAxis: {
       type: 'category',
       data: ['Vault Talk', 'Manual intake', 'Open Reporting', 'App'],
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: AXIS_DEFAULTS.axisLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     series: [
       {
         type: 'bar',
         data: [3, 6, 7, 14],
-        itemStyle: { color, borderRadius: [0, 4, 4, 0] },
-        label: { show: true, position: 'right', color: theme.palette.text.primary },
+        itemStyle: { color: VIZ.softBlue, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'right', color: VIZ.dataLabel },
       },
     ],
     grid: { left: 20, right: 40, top: 10, bottom: 30, containLabel: true },
@@ -271,34 +402,33 @@ function IntakeChannelsChart() {
 }
 
 function RegionalDistributionChart() {
-  const theme = useTheme();
-  const palette = useChartPalette();
+  // Ranked low → high, gradient applied accordingly; Unknown gets neutral
   const option = {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'value',
       max: 15,
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      splitLine: AXIS_DEFAULTS.splitLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     yAxis: {
       type: 'category',
       data: ['Unknown', 'Singapore', 'Germany', 'United States', 'United Kingdom'],
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: AXIS_DEFAULTS.axisLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     series: [
       {
         name: 'Cases',
         type: 'bar',
         data: [
-          { value: 4, itemStyle: { color: theme.palette.text.disabled, borderRadius: [0, 4, 4, 0] } },
-          { value: 4, itemStyle: { color: palette[3], borderRadius: [0, 4, 4, 0] } },
-          { value: 5, itemStyle: { color: palette[2], borderRadius: [0, 4, 4, 0] } },
-          { value: 7, itemStyle: { color: palette[1], borderRadius: [0, 4, 4, 0] } },
-          { value: 11, itemStyle: { color: palette[0], borderRadius: [0, 4, 4, 0] } },
+          { value: 4,  itemStyle: { color: VIZ.neutral,      borderRadius: [0, 4, 4, 0] } },
+          { value: 4,  itemStyle: { color: VIZ.gradient[0],  borderRadius: [0, 4, 4, 0] } },
+          { value: 5,  itemStyle: { color: VIZ.gradient[1],  borderRadius: [0, 4, 4, 0] } },
+          { value: 7,  itemStyle: { color: VIZ.gradient[3],  borderRadius: [0, 4, 4, 0] } },
+          { value: 11, itemStyle: { color: VIZ.gradient[4],  borderRadius: [0, 4, 4, 0] } },
         ],
-        label: { show: true, position: 'right', color: theme.palette.text.primary },
+        label: { show: true, position: 'right', color: VIZ.dataLabel },
       },
     ],
     grid: { left: 20, right: 40, top: 10, bottom: 30, containLabel: true },
@@ -307,29 +437,31 @@ function RegionalDistributionChart() {
 }
 
 function CaseStatusChart() {
-  const palette = useChartPalette();
-  const theme = useTheme();
-  const statusColors = [palette[4], palette[3], palette[0], palette[2]];
+  // Semantic colors: alert for unresolved, amber for in-progress, success for closed
+  const statusColors = [VIZ.alert, VIZ.softBlue, VIZ.amber, VIZ.success];
   const option = {
     tooltip: { trigger: 'axis', formatter: '{b}: {c} cases' },
     xAxis: {
       type: 'value',
       max: 16,
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      splitLine: AXIS_DEFAULTS.splitLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     yAxis: {
       type: 'category',
       data: ['New / unactioned', 'Read', 'Under investigation', 'Closed'],
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: AXIS_DEFAULTS.axisLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     series: [
       {
         name: 'Cases',
         type: 'bar',
-        data: [3, 4, 11, 12].map((v, i) => ({ value: v, itemStyle: { color: statusColors[i], borderRadius: [0, 4, 4, 0] } })),
-        label: { show: true, position: 'right', color: theme.palette.text.primary },
+        data: [3, 4, 11, 12].map((v, i) => ({
+          value: v,
+          itemStyle: { color: statusColors[i], borderRadius: [0, 4, 4, 0] },
+        })),
+        label: { show: true, position: 'right', color: VIZ.dataLabel },
       },
     ],
     grid: { left: 20, right: 50, top: 10, bottom: 30, containLabel: true },
@@ -338,29 +470,34 @@ function CaseStatusChart() {
 }
 
 function DepartmentalPatternsChart() {
-  const theme = useTheme();
-  const color = theme.palette.info.main;
+  // Ranked low → high, stepped gradient across 7 bars
+  const deptColors = [
+    VIZ.gradient[0], VIZ.gradient[0], VIZ.gradient[1],
+    VIZ.gradient[1], VIZ.gradient[2], VIZ.gradient[3], VIZ.gradient[4],
+  ];
   const option = {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'value',
       max: 8,
-      splitLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      splitLine: AXIS_DEFAULTS.splitLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     yAxis: {
       type: 'category',
       data: ['HR', 'Unknown', 'Engineering', 'Sales', 'Finance', 'Operations', 'Legal & Compliance'],
-      axisLine: { lineStyle: { color: theme.palette.divider } },
-      axisLabel: { color: theme.palette.text.secondary },
+      axisLine: AXIS_DEFAULTS.axisLine,
+      axisLabel: AXIS_DEFAULTS.axisLabel,
     },
     series: [
       {
         name: 'Cases',
         type: 'bar',
-        data: [3, 4, 4, 4, 4, 5, 6],
-        itemStyle: { color, borderRadius: [0, 4, 4, 0] },
-        label: { show: true, position: 'right', color: theme.palette.text.primary },
+        data: [3, 4, 4, 4, 4, 5, 6].map((v, i) => ({
+          value: v,
+          itemStyle: { color: deptColors[i], borderRadius: [0, 4, 4, 0] },
+        })),
+        label: { show: true, position: 'right', color: VIZ.dataLabel },
       },
     ],
     grid: { left: 20, right: 40, top: 10, bottom: 30, containLabel: true },

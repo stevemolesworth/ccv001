@@ -71,16 +71,17 @@ function ChatContent() {
 
   return (
     <AIChatUI
-      title="AI assistant"
-      subtitle="Ask me anything — I'm here to help."
+      title="Ask your AI assistant anything."
+      subtitle="Type a request or view the Assist Tools available below."
       chatBox={
         <AIChatBox
           onSubmit={handleSubmit}
           onStop={() => setIsGenerating(false)}
+          slotProps={{ textField: { placeholder: 'Type your message...' } }}
           contentBelow={
             <Stack direction="row" gap={1} sx={{ flexWrap: 'nowrap' }}>
               <Button variant="outlined" startIcon={<BoardGroupIcon />} fullWidth sx={{ whiteSpace: 'nowrap' }}>
-                Appoint board member
+                Appoint a Board Member
               </Button>
               <Button
                 variant="outlined"
@@ -89,7 +90,7 @@ function ChatContent() {
                 fullWidth
                 sx={{ whiteSpace: 'nowrap' }}
               >
-                Create compliance report
+                Create a compliance report
               </Button>
             </Stack>
           }
